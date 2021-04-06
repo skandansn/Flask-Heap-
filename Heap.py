@@ -43,6 +43,8 @@ class MaxHeap:
         self.size += 1
 
     def extractMax(self):
+        if(self.size==0):
+            return None
         popped = self.Heap[0]
         popped2 = self.Heap_Name[0]
         self.Heap[0] = self.Heap[self.size-1]

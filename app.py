@@ -6,40 +6,56 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
 
-class Todo(db.Model):
+class Lists(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.String(200),nullable=False)
-    date_created = db.Column(db.DateTime,default = datetime.utcnow)
+    priority = db.Column(db.Integer,nullable=False)
 
     def __repr__(self):
-        return '<Task %r>' %self.id
+        return '<Element %r>' %self.id
 
 @app.route('/', methods=['POST','GET'])
-def hello():
+def insertHome():
     if request.method == 'POST':
-        task_content = request.form['content']
-        new_task =Todo(content=task_content)
+        sent_elem = request.form['content']
+        v,p=0,0
         try:
-            db.session.add(new_task)
+            print(sent_elem)
+            v,p=map(str,sent_elem.split())
+            print(v,p,"sss")
+        except:
+            return "Please enter space seperated values while inserting a value"
+        new_val =Lists(content=v,priority=p)
+        try:
+            db.session.add(new_val)
             db.session.commit()
             return redirect('/')
         except:
             return 'Error'
     else:
-        task = Todo.query.order_by(Todo.date_created).all()
-        return render_template('index.html',tasks = task)
+        list = Lists.query.order_by(Lists.id).all()
+        values=[]
+        priorities=[]
+        for i in list:
+            values.append(i.content)
+            priorities.append(i.priority)
+        
+            
+        print("Values are",values,"Priorities are",priorities)
+        return render_template('index.html',items = list)
 
 @app.route('/delete/<int:id>')
 def delete(id):
-    task_to_delete = Todo.query.get_or_404(id)
+    item_to_delete = Lists.query.get_or_404(id)
 
     try:
-        db.session.delete(task_to_delete)
+        db.session.delete(item_to_delete)
         db.session.commit()
         return redirect('/')
 
     except:
-        return 'Error Delete'
+        return 'Error Deleting'
 
 if __name__ == '__main__':
+
     app.run(debug=True)

@@ -1,10 +1,13 @@
 from flask import Flask,render_template,url_for,request,redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import Heap as h
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
+heap = h.MaxHeap(10)
+flag = 0
 
 class Lists(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -25,6 +28,8 @@ def insertHome():
             print(v,p,"sss")
         except:
             return "Please enter space seperated values while inserting a value"
+        heap.insert(int(p),v)
+        print(heap.Heap)
         new_val =Lists(content=v,priority=p)
         try:
             db.session.add(new_val)
@@ -39,8 +44,11 @@ def insertHome():
         for i in list:
             values.append(i.content)
             priorities.append(i.priority)
-        
-            
+            global flag
+            if flag < len(list):
+                heap.insert(i.priority,i.content)
+                flag += 1
+        print(heap.Heap)
         print("Values are",values,"Priorities are",priorities)
         return render_template('index.html',items = list)
 

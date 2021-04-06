@@ -6,7 +6,7 @@ import Heap as h
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
-heap = h.MaxHeap(10)
+heap = h.MaxHeap(2**10 - 1)
 flag = 0
 
 class Lists(db.Model):
@@ -52,13 +52,18 @@ def insertHome():
         print("Values are",values,"Priorities are",priorities)
         return render_template('index.html',items = list)
 
-@app.route('/delete/<int:id>')
-def delete(id):
-    item_to_delete = Lists.query.get_or_404(id)
-
-    try:
+@app.route('/delete')
+def delete():
+    delv = heap.extractMax()
+    print(delv)
+    obj = Lists.query.filter_by(priority = delv).first()
+    print(obj)
+    item_to_delete = Lists.query.get_or_404(obj.id)
+    try:    
         db.session.delete(item_to_delete)
         db.session.commit()
+        print(delv)
+        print(heap.Heap)
         return redirect('/')
 
     except:

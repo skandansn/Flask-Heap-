@@ -11,23 +11,18 @@
         <tr>
             <th>Name</th>
             <th>Age</th>
-            <th>Actions</th>
         </tr>
         <tr>
         {% for item in items %}
             <td>{{ item.content }}</td>
             <td>{{ item.priority }}</td>
-            <td>
-                <a href="/delete/{{item.id}}">Delete</a>
-                <br>
-            </td>
         </tr>
         {% endfor %}
     </table>
     <form actions='/' method="POST">
         <input type="text" name="content" id="content">
         <input type="submit" value="Add Element">
-
+        <a href="/delete">Delete</a>
     </form>
 </div>
 {% endblock %}

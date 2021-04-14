@@ -1,23 +1,66 @@
 from flask import Flask,render_template,url_for,request,redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import Heap as h
+from flask_bootstrap import Bootstrap
+from flask_wtf import FlaskForm
+from wtforms import StringField
+from wtforms import PasswordField,PasswordField,BooleanField
+from wtforms.validators import InputRequired,Email,Length
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
+import Heap as h
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
+app.config['SECRET_KEY']="sec"
+Bootstrap(app)
 heap = h.MaxHeap(2**5 - 1)
 flag = 0
+
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+class User(UserMixin,db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(15), unique=True)
+    email = db.Column(db.String(50), unique=True)
+    password = db.Column(db.String(80))
+    city = db.Column(db.String(25))
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+class LoginForm(FlaskForm):
+    username = StringField('username', validators=[InputRequired(), Length(min=4, max=15)])
+    password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
+
+class RegisterForm(FlaskForm):
+    email = StringField('email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
+    username = StringField('username', validators=[InputRequired(), Length(min=4, max=15)])
+    password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
+    city=StringField('city', validators=[InputRequired(), Length(min=3, max=25)])
+
+
+
+
 
 class Lists(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.String(200),nullable=False)
     priority = db.Column(db.Integer,nullable=False)
+    city = db.Column(db.String(25),nullable=False)
+
 
     def __repr__(self):
         return '<Element %r>' %self.id
 
-@app.route('/', methods=['POST','GET'])
+@app.route('/home', methods=['POST','GET'])
+@login_required
 def insertHome():
     if request.method == 'POST':
         sent_elem = request.form['content']
@@ -28,27 +71,31 @@ def insertHome():
             return "Please enter space seperated values while inserting a value"
         heap.insert(int(p),v)
         print(heap.Heap)
-        new_val =Lists(content=v,priority=p)
+        new_val =Lists(content=v,priority=p,city=current_user.city)
         try:
             db.session.add(new_val)
             db.session.commit()
-            return redirect('/')
+            return redirect('/home')
         except:
             return 'Error'
     else:
         list = Lists.query.order_by(Lists.id).all()
         values=[]
+        neededlist=[]
         priorities=[]
+        global flag
         for i in list:
-            values.append(i.content)
-            priorities.append(i.priority)
-            global flag
-            if flag ==0:
-                heap.insert(i.priority,i.content)
+            # print(i.city,current_user.city)
+            if(i.city==current_user.city):
+                neededlist.append(i)
+                values.append(i.content)
+                priorities.append(i.priority)
+                if flag == 0:
+                    heap.insert(i.priority,i.content)
         flag = 1
         print(heap.Heap)
         print("Values are",values,"Priorities are",priorities)
-        return render_template('index.html',items = list,delv=request.args.get('delv'))
+        return render_template('home.html',name=current_user.username ,city=current_user.city,items = neededlist,delv=request.args.get('delv'))
 
 @app.route('/delete')
 def delete():
@@ -60,11 +107,50 @@ def delete():
         try:    
             db.session.delete(item_to_delete)
             db.session.commit()
-            return redirect(url_for('.insertHome', delv="Person "+str(obj.content)+" of age "+str(obj.priority)+" got vaccinated."))
+            return redirect(url_for('.insertHome', delv=str(obj.content)+" (age "+str(obj.priority)+") just got vaccinated."))
 
         except:
             return 'Error Deleting'
-    return redirect('/')
+    return redirect('/home')
+
+@app.route('/login',methods=['GET','POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+
+        user=User.query.filter_by(username=form.username.data).first()
+        if user:
+            if check_password_hash(user.password, form.password.data):
+                login_user(user)
+                return redirect(url_for('insertHome'))
+        return '<h1>Invalid uname or password</h1>'
+            
+    return render_template('login.html',form=form)
+
+@app.route('/register',methods=['GET','POST'])
+def register():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        hashed_password = generate_password_hash(form.password.data, method='sha256')
+
+        new_user=User(username=form.username.data, email=form.email.data, password=hashed_password,city=form.city.data)
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('login'))
+    return render_template('register.html',form=form)
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+
+    return redirect(url_for('index'))
+
 
 if __name__ == '__main__':
 

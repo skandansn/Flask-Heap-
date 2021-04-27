@@ -15,7 +15,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
 app.config['SECRET_KEY']="sec"
 Bootstrap(app)
-heap = h.MaxHeap(2**5 - 1)
+heap = h.MaxHeap(2**10 - 1)
 flag = 0
 
 
@@ -33,6 +33,8 @@ class User(UserMixin,db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
+    global flag
+    flag=0
     return User.query.get(int(user_id))
 
 class LoginForm(FlaskForm):
@@ -61,7 +63,27 @@ class Lists(db.Model):
 
 @app.route('/home', methods=['POST','GET'])
 @login_required
-def insertHome():
+def insertHome():     
+    delv = heap.extractMax()
+    while(delv!=None):
+        delv=heap.extractMax()
+    list = Lists.query.order_by(Lists.id).all()   
+    values=[]
+    neededlist=[]
+    priorities=[]
+    for i in list:
+        if(i.city==current_user.city):
+            neededlist.append(i)
+            values.append(i.content)
+            priorities.append(i.priority)
+    if(values!=None and heap.Heap==None):
+        for i in list:
+            if(i.city==current_user.city):
+                neededlist.append(i)
+                values.append(i.content)
+                priorities.append(i.priority)
+                heap.insert(i.priority,i.content)
+
     if request.method == 'POST':
         sent_elem = request.form['content']
         v,p=0,0
@@ -70,7 +92,6 @@ def insertHome():
         except:
             return "Please enter space seperated values while inserting a value"
         heap.insert(int(p),v)
-        print(heap.Heap)
         new_val =Lists(content=v,priority=p,city=current_user.city)
         try:
             db.session.add(new_val)
@@ -79,13 +100,13 @@ def insertHome():
         except:
             return 'Error'
     else:
+      
         list = Lists.query.order_by(Lists.id).all()
         values=[]
         neededlist=[]
         priorities=[]
         global flag
         for i in list:
-            # print(i.city,current_user.city)
             if(i.city==current_user.city):
                 neededlist.append(i)
                 values.append(i.content)
@@ -93,25 +114,47 @@ def insertHome():
                 if flag == 0:
                     heap.insert(i.priority,i.content)
         flag = 1
-        print(heap.Heap)
         print("Values are",values,"Priorities are",priorities)
         return render_template('home.html',name=current_user.username ,city=current_user.city,items = neededlist,delv=request.args.get('delv'))
 
 @app.route('/delete')
 def delete():
+    insertHome()
+
     delv = heap.extractMax()
-    print(delv)
     if(delv is not None):
         obj = Lists.query.filter_by(priority = delv).first()
-        item_to_delete = Lists.query.get_or_404(obj.id)
-        try:    
-            db.session.delete(item_to_delete)
-            db.session.commit()
-            return redirect(url_for('.insertHome', delv=str(obj.content)+" (age "+str(obj.priority)+") just got vaccinated."))
+        if(obj.city==current_user.city):
+            item_to_delete = Lists.query.get_or_404(obj.id)
+            try:    
+                db.session.delete(item_to_delete)
+                db.session.commit()
+                return redirect(url_for('.insertHome', delv=str(obj.content)+" (age "+str(obj.priority)+") just got vaccinated."))
 
-        except:
-            return 'Error Deleting'
+            except:
+                return 'Error Deleting'
+        else:
+            while(delv!=None):
+                delv=heap.extractMax()
+                if(delv==None):
+                    return "Error Deleting"
+                obj = Lists.query.filter_by(priority = delv).first()
+                if(obj.city==current_user.city):
+                    item_to_delete = Lists.query.get_or_404(obj.id)
+                    try:    
+                        db.session.delete(item_to_delete)
+                        db.session.commit()
+                        return redirect(url_for('.insertHome', delv=str(obj.content)+" (age "+str(obj.priority)+") just got vaccinated."))
+
+                    except:
+                        return 'Error Deleting'
+
+    else:
+        return "Insert elements first to delete"
     return redirect('/home')
+
+        
+        
 
 @app.route('/login',methods=['GET','POST'])
 def login():
@@ -122,6 +165,8 @@ def login():
         if user:
             if check_password_hash(user.password, form.password.data):
                 login_user(user)
+                global flag
+                flag=0
                 return redirect(url_for('insertHome'))
         return '<h1>Invalid uname or password</h1>'
             
@@ -148,6 +193,10 @@ def index():
 @login_required
 def logout():
     logout_user()
+    delv = heap.extractMax()
+    while(delv!=None):
+        delv=heap.extractMax()
+
 
     return redirect(url_for('index'))
 

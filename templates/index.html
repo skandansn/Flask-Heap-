@@ -22,6 +22,7 @@ Covid Waitlist{% endblock %}
 html { width: 100%; height:100%; overflow:hidden; }
 
 body { 
+  overflow: auto;
   width: 100%;
   height:100%;
   font-family: 'Open Sans', sans-serif;
@@ -39,12 +40,49 @@ body {
   background-color: rgba(104,128,138,.1);
   color: whitesmoke;
 }
+.topnav {
+    background-color: #333;
+    overflow: hidden;
+}
 
+/* Style the links inside the navigation bar */
+.topnav a {
+  float: left;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+/* Change the color of links on hover */
+/* .topnav a:hover {
+  background-color: #ddd;
+  color: purple;
+} */
+.topnav-left a:hover{
+    background-color: #ddd;
+    color: black;
+}
+/* Add a color to the active/current link */
+/* .topnav a.active {
+  background-color: black;
+  color: white;
+} */
+
+/* Right-aligned section inside the top navigation */
+.topnav-right {
+  float: right;
+  /* margin: 2px,10px,1px,2px; */
+  margin-top: 4px;
+  margin-right: 20px;
+  margin-bottom: 4px;
+}
 </style>
 {% endblock %}
 
 {% block content %}
-    <nav class="navbar navbar-inverse navbar-fixed-top">
+    <!-- <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -53,44 +91,56 @@ body {
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Covid-19 Vaccine Waitlist</a>
+          <a class="navbar-brand" href="{{ url_for('index') }}">Covid-19 Vaccine Waitlist</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li ><a href="#">Home</a></li>
+            <li ><a href="{{ url_for('index') }}">Home</a></li>
             <li><a href="{{ url_for('login') }}">Login</a></li>
             <li><a href="{{ url_for('register') }}">Sign Up</a></li>
           </ul>
-        </div><!--/.nav-collapse -->
+        </div>
       </div>
-    </nav>
-
-    <div class="container">
-     
-      <div class="para">
-        <h1>
-          Covid-19 Vaccine Information
-        </h1>
-        <p>
-          Vaccination is a safe and effective way to prevent disease and save lives – now more than ever. 
-          Today there are vaccines available to protect against at least 20 diseases, such as diphtheria, tetanus, pertussis, influenza and measles. 
-          <br><br>
-          Together, these vaccines save the lives of up to 3 million people every year.
-          When we get vaccinated, we aren’t just protecting ourselves, but also those around us. 
-          Some people, like those who are seriously ill, are advised not to get certain vaccines – so they depend on the rest of us to get vaccinated and help reduce the spread of disease. 
-          During the COVID-19 pandemic, vaccination continues to be critically important. The pandemic has caused a decline in the number of children receiving routine immunizations, which could lead to an increase in illness and death from preventable diseases. 
-          WHO has urged countries to ensure that essential immunization and health services continue, despite the challenges posed by COVID-19.
+    </nav> -->
+    <div class="topnav">
+      <a class="navbar-brand" href="{{ url_for('index') }}">Covid-19 Vaccine Waitlist</a>
+      <div class="topnav-left" >
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('aboutUs') }}">About Heaps</a>
+        <a href="{{ url_for('covidres') }}">View Covid-19 Cases</a>
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Sign Up</a>
+      </div>
+      <!-- <div class="topnav-right">
+          <a href="{{ url_for('logout') }}" class="btn btn-primary btn-small" id="logout-button">Logout</a>
+      </div> -->
+    </div>
+    <div class="para" style="margin-top: 0px; height: 100%;">
+      <h1>
+        Covid-19 Vaccine Information
+      </h1>
+      <p>
+        Vaccination is a safe and effective way to prevent disease and save lives – now more than ever. 
+        Today there are vaccines available to protect against at least 20 diseases, such as diphtheria, tetanus, pertussis, influenza and measles. 
         <br><br>
-          Vaccination is safe and side effects from a vaccine are usually minor and temporary, such as a sore arm or mild fever. 
-          More serious side effects are possible, but extremely rare.
-          Any licensed vaccine is rigorously tested across multiple phases of trials before it is approved for use, and regularly reassessed once it is introduced. 
-          Scientists are also constantly monitoring information from several sources for any sign that a vaccine may cause health risks.
-          <br><br>
-          Remember, you are far more likely to be seriously injured by a vaccine-preventable disease than by a vaccine. For example, tetanus can cause extreme pain, muscle spasms (lockjaw) and blood clots, measles can cause encephalitis (an infection of the brain) and blindness.
-          Many vaccine-preventable diseases can even result in death. The benefits of vaccination greatly outweigh the risks, and many more illnesses and deaths would occur without vaccines.
-        </p>
-        <!-- <p class="lead" style="color: whitesmoke;">Heap is a DS</p> -->
-      </div>
-
-    </div><!-- /.container -->
+        Together, these vaccines save the lives of up to 3 million people every year.
+        When we get vaccinated, we aren’t just protecting ourselves, but also those around us. 
+        Some people, like those who are seriously ill, are advised not to get certain vaccines – so they depend on the rest of us to get vaccinated and help reduce the spread of disease. 
+        During the COVID-19 pandemic, vaccination continues to be critically important. The pandemic has caused a decline in the number of children receiving routine immunizations, which could lead to an increase in illness and death from preventable diseases. 
+        WHO has urged countries to ensure that essential immunization and health services continue, despite the challenges posed by COVID-19.
+      <br><br>
+        Vaccination is safe and side effects from a vaccine are usually minor and temporary, such as a sore arm or mild fever. 
+        More serious side effects are possible, but extremely rare.
+        Any licensed vaccine is rigorously tested across multiple phases of trials before it is approved for use, and regularly reassessed once it is introduced. 
+        Scientists are also constantly monitoring information from several sources for any sign that a vaccine may cause health risks.
+        <br><br>
+        Remember, you are far more likely to be seriously injured by a vaccine-preventable disease than by a vaccine. For example, tetanus can cause extreme pain, muscle spasms (lockjaw) and blood clots, measles can cause encephalitis (an infection of the brain) and blindness.
+        Many vaccine-preventable diseases can even result in death. The benefits of vaccination greatly outweigh the risks, and many more illnesses and deaths would occur without vaccines.
+      </p>
+      <br><br>
+      <!-- <h3>Daily Covid-19 results below .......</h3> -->
+        
+      <!-- <p class="lead" style="color: whitesmoke;">Heap is a DS</p> -->
+    </div>
+    <!-- <iframe style="border-style: none; background-color: #333333; color: #f5f5f5;" src="https://shakthi-stack.github.io/bs-covid-wscraping/" height="93%" width="100%"></iframe> -->
 {% endblock %}

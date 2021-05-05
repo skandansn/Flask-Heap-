@@ -187,6 +187,44 @@ def register():
 
 @app.route('/')
 def index():
+    from bs4 import BeautifulSoup
+    import requests
+    import pandas as pd
+
+    url="https://www.worldometers.info/coronavirus/"
+    html_content = requests.get(url).text
+    soup = BeautifulSoup(html_content, "lxml")
+    covid_table = soup.find("table", attrs={"id": "main_table_countries_today"})
+    head = covid_table.thead.find_all("tr")
+
+    headings = []
+    for th in head[0].find_all("th"):
+        headings.append(th.text.replace("\n","").strip())
+
+    body = covid_table.tbody.find_all("tr") 
+    # print(body[0])
+    data = []
+    for r in range(1,len(body)):
+        row = []
+        for tr in body[r].find_all("td"):
+            row.append(tr.text.replace("\n","").strip())
+        data.append(row)
+    df = pd.DataFrame(data,columns=headings)
+    df = df.iloc[7:]
+    df = df.reset_index(drop=True)
+    cols = ['#',
+            'Tot\xa0Cases/1M pop',
+            'Deaths/1M pop',
+            'Tests/1M pop',
+            'Population',
+            '1 Caseevery X ppl',
+            '1 Deathevery X ppl',
+            '1 Testevery X ppl']
+    # data_final = data.drop(cols, axis=1)
+    df.drop(cols,axis=1,inplace=True)
+    print(df.head(5))
+    df.to_csv("D:/bs-covid-wscraping/data/covid-19.csv")
+
     return render_template('index.html')
 
 @app.route('/logout')
@@ -199,7 +237,13 @@ def logout():
 
 
     return redirect(url_for('index'))
+@app.route('/aboutUs')
+def aboutUs():
+    return render_template('aboutUs.html')
 
+@app.route('/covidres')
+def covidres():
+    return render_template('covidres.html')
 
 if __name__ == '__main__':
 

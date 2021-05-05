@@ -6,18 +6,48 @@
 
 {% block body %}
 <div class="header">
-  
-    <h1>Welcome {{ name }} </h1>
-    <a href="{{ url_for('logout') }}" class="btn btn-primary btn-large">Logout</a>
+    <!-- <nav>
+        <ul>
+          <li><h1 style="font-size: large;">Welcome {{ name }} </h1></li>  
+          <li><a href="#">Home </a></li>
+          <li><a href="#">About </a></li>
+          <li><a href="#">Services </a></li>
+          <li><a href="#">Contact </a></li>
+          <li><a href="#">Images </a></li>
+          <li><a href="{{ url_for('logout') }}" class="btn btn-primary btn-large" id="logout-button">Logout</a></li>
+          <li>
+            <a href="#">
+              <i class="fa fa-bars"></i>
+            </a>
+          </li>
+          <input type="search" />
+        </ul>
+      </nav> -->
+      <div class="topnav">
+        <a class="navbar-brand" href="{{ url_for('index') }}">Covid-19 Vaccine Waitlist</a>
+        <a> <h1 style="font-size: larger;">Welcome {{ name }} </h1></a>
+        <div class="topnav-left" >
+            <a href="{{ url_for('insertHome') }}">Home</a>
+            <!-- <a href="#news">News</a> -->
+            <a href="{{ url_for('aboutUs') }}">About Heaps</a>
+            <a href="{{ url_for('covidres') }}">View Covid-19 Cases</a>
+        </div>
+
+        <div class="topnav-right">
+            <a href="{{ url_for('logout') }}" class="btn btn-primary btn-small" id="logout-button">Logout</a>
+        </div>
+      </div>
+    <!-- <h1>Welcome {{ name }} </h1> -->
+    <!-- <a href="{{ url_for('logout') }}" class="btn btn-primary btn-large">Logout</a> -->
     <!-- <a href="{{ url_for('logout') }}" class="btn btn-primary">Go to Google</a> -->
     
 </div>
 <br>
 <br>
-<div class ="content">
+<div class ="content" style="margin-left: 400px;">
     <h2>Covid-19 Vaccine Waitlist for city: {{ city }}</h2>
     <br>
-    <table>
+    <table style="text-align: left;">
         <tr>
             <th>Name</th>
             <th>Age</th>
@@ -31,7 +61,7 @@
     </table>
     <br><br>
     <form actions='/' method="POST">
-        <input class="addPerson" type="text" name="content" id="content">
+        <input class="addPerson" type="text" name="content" id="content" style="width: 50%;">
         
         <button type="submit" class="btn btn-primary btn-large btnp " value="Add person">Add person</button>
         <!-- <input type="submit" value="Add person"> -->
